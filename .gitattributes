@@ -1,0 +1,6 @@
+# Set the default behaviour: auto update lines to local on checkout and auto convert on push
+* text=auto
+
+# All that shouldn't be modified
+
+

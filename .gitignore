@@ -1,0 +1,7 @@
+# exclude directories
+.vs/*
+.vscode/*
+*.DS_Store
+
+out/*
+bin/*
