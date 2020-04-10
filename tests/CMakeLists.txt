@@ -6,7 +6,7 @@ target_link_libraries(NiazipTests PUBLIC
 	#gtest_main
 	gtest
 	gmock
-	Niazip
+	niazip
 )
 
 target_include_directories(NiazipTests PUBLIC
