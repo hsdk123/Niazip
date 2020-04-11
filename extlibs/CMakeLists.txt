@@ -6,7 +6,8 @@ include(FetchContent)
 # minizip
 FetchContent_Declare(
   minizip
-  GIT_REPOSITORY https://github.com/nmoinvaz/minizip.git
+  #GIT_REPOSITORY https://github.com/nmoinvaz/minizip.git
+  GIT_REPOSITORY https://github.com/hsdk123/minizip.git
   GIT_TAG        master
 )
 FetchContent_MakeAvailable(minizip)
