@@ -36,7 +36,8 @@ std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromFile(const strin
         mz_zip_reader_set_progress_cb(_handle, options, minizip_extract_progress_cb);
         mz_zip_reader_set_overwrite_cb(_handle, options, minizip_extract_overwrite_cb);*/
 
-        const auto err = mz_zip_reader_open_file_in_memory(ret->_handle, filepath.c_str());
+        const auto err = mz_zip_reader_open_file(ret->_handle, filepath.c_str());
+        //const auto err = mz_zip_reader_open_file_in_memory(ret->_handle, filepath.c_str());
 
         // check errors
         if (err != MZ_OK) {
