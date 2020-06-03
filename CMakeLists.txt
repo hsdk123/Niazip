@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.13)
 project(NIAZIP LANGUAGES CXX C)
 
+if (NOT DEFINED NIAZIP_LOCAL_BUILD)
+set(NIAZIP_LOCAL_BUILD ON)
+endif()
+
+message(STATUS "NIAZIP_LOCAL_BUILD: ${NIAZIP_LOCAL_BUILD}")
+
+#----------------------------------------------------------------------------------
+# Project settings for default dev build
+if (NIAZIP_LOCAL_BUILD)
+
 # global settings
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
 set(CMAKE_CXX_STANDARD 17) 
@@ -17,7 +27,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CORE_BIN_DIRECTORY})
 
 # reference: https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-set(GTEST_MSVC_SEARCH "MT" FORCE)
+set(gtest_force_shared_crt OFF CACHE BOOL "" FORCE)
+
+endif()
+#----------------------------------------------------------------------------------
 
 # Subdirectories
 add_subdirectory(extlibs)
