@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.15)
 project(NIAZIP LANGUAGES CXX C)
 
 if (NOT DEFINED NIAZIP_LOCAL_BUILD)
