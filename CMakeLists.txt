@@ -5,7 +5,9 @@ if (NOT DEFINED NIAZIP_LOCAL_BUILD)
 set(NIAZIP_LOCAL_BUILD ON)
 endif()
 
+option(WITH_NIAZIP_TESTS "Build niazip tests" ON)
 message(STATUS "NIAZIP_LOCAL_BUILD: ${NIAZIP_LOCAL_BUILD}")
+message(STATUS "WITH_NIAZIP_TESTS: ${WITH_NIAZIP_TESTS}")
 
 #----------------------------------------------------------------------------------
 # Project settings for default dev build
@@ -35,5 +37,8 @@ endif()
 # Subdirectories
 add_subdirectory(extlibs)
 add_subdirectory(src)
+
+if (WITH_NIAZIP_TESTS)
 add_subdirectory(tests)
+endif()
 
