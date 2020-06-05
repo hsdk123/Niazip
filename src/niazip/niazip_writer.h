@@ -27,9 +27,11 @@ namespace niazpp
 
 		static std::unique_ptr<niazip_writer> Create(const string_type& filepath, string_view password = "");
 
-		// writing methods
+		// individual entry additions
 		bool add_entry_from_file(const string_type& filepath);
 		bool add_entry_from_memory(const memory_source& source);
+
+		// adds the [contents] of the directory, thus excludes including the directory itself.
 		bool add_directory_contents(const string_type& directory_path);
 
 	public:

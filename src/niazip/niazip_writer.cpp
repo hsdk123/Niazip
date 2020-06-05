@@ -76,9 +76,49 @@ bool niazpp::niazip_writer::add_entry_from_memory(const memory_source& source)
 	return false;
 }
 
+#include <filesystem>
+#include "niazip_helpers.h"
+
 bool niazpp::niazip_writer::add_directory_contents(const string_type& directory_path)
 {
-	return false;
+	using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
+	for (auto& path_entry : recursive_directory_iterator(directory_path)) 
+	{
+		if (!path_entry.is_regular_file()) {
+			continue;
+		}
+
+		// strip top directory path when registering in archive
+		const auto filepath = niazpp::ws2s(std::wstring(path_entry.path().c_str()));
+		const auto local_filepath = filepath.substr(directory_path.size());
+
+		// get file buffer
+		std::string data;
+		{
+			std::ifstream file(filepath, std::ios::binary);
+			if (!file) {
+				return false;
+			}
+			const auto size = std::filesystem::file_size(path_entry.path());
+			data = std::string(size, '\0');
+			{
+				file.read(data.data(), size);
+			}
+		}
+
+		// create file info 
+		mz_zip_file file_info = { 0 };
+		{
+			file_info.filename = local_filepath.c_str();
+			file_info.flag = MZ_ZIP_FLAG_UTF8;
+		}
+
+		if (mz_zip_writer_add_buffer(_handle, data.data(), data.size(), &file_info) != MZ_OK) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 std::vector<file_info> niazpp::niazip_writer::get_info_entries()
