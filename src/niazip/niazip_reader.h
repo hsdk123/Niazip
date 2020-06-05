@@ -9,12 +9,6 @@
 
 namespace niazpp
 {
-	using memory_source = std::string; // std::vector<char>;
-	using string_type = std::string;
-	using string_view = std::string_view;
-}
-namespace niazpp
-{
 	class niazip_reader
 	{
 	public:
