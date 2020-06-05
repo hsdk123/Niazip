@@ -4,5 +4,6 @@ target_sources(niazip PRIVATE
 	#niazip_impl.cpp
 	niazip_reader.cpp
 	niazip_writer.cpp
+	niazip_helpers.cpp
 )
 

@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <fstream>
 
-const std::string g_test_data_write_filepath = "./data/test_write_data.zip";
+const niazpp::pathstring_type g_test_data_write_filepath = L"./data/test_write_data.zip";
 
 TEST(WriterTest, BasicCheck)
 {
@@ -17,13 +17,14 @@ TEST(WriterTest, BasicCheck)
 	using namespace niazpp;
 	{
 		// previous test cleanup.
-		remove(g_test_data_write_filepath.c_str());
+		/*remove(std::filesystem::path(g_test_data_write_filepath.begin(), g_test_data_write_filepath.end()));*/
+		remove(std::filesystem::path(g_test_data_write_filepath));
 
 		const auto writer = niazip_writer::Create(g_test_data_write_filepath);
 		ASSERT_TRUE(writer);
 		{
 			// create file
-			const std::string filename = "test_file.txt";
+			const auto filename = std::filesystem::path(L"test_file.txt");
 			{
 				ofstream file(filename);
 				file << "my text";
@@ -34,7 +35,7 @@ TEST(WriterTest, BasicCheck)
 			ASSERT_TRUE(writer->add_entry_from_file(filename));
 
 			// cleanup
-			remove(filename.c_str());
+			remove(filename);
 		}
 	}
 	{
@@ -44,13 +45,13 @@ TEST(WriterTest, BasicCheck)
 		const auto& vec_entry_names = reader->get_entry_names();
 		{
 			ASSERT_EQ(vec_entry_names.size(), 1);
-			ASSERT_THAT(vec_entry_names, testing::UnorderedElementsAre("test_file.txt"));
+			ASSERT_THAT(vec_entry_names, testing::UnorderedElementsAre(L"test_file.txt"));
 		}
 	}
 }
 
 namespace {
-void clean_filepaths(std::vector<std::string>& filepaths) {
+void clean_filepaths(std::vector<niazpp::pathstring_type>& filepaths) {
 	// replace all backward slashes with forward slashes
 	for (auto& filepath : filepaths) {
 		std::replace(filepath.begin(), filepath.end(), '\\', '/');
@@ -64,15 +65,16 @@ TEST(WriterTest, DirectoryAdd)
 	using namespace std::filesystem;
 	using namespace niazpp;
 
-	const std::string root_directory = "./test_directory/";
+	const niazpp::pathstring_type test_directory_data_write_filepath = L"./data/test_write_directory_data.zip";
+	const niazpp::pathstring_type root_directory = L"./test_directory/";
 	const auto directory_count = 5;
 	{
 		// previous test cleanup.
-		remove(g_test_data_write_filepath.c_str());
+		remove(test_directory_data_write_filepath.c_str());
 		remove_all(root_directory);
 
 		// a. write
-		std::vector<std::string> populated_filenames;
+		std::vector<niazpp::pathstring_type> populated_filenames;
 		{
 			create_directory(root_directory);
 
@@ -80,28 +82,29 @@ TEST(WriterTest, DirectoryAdd)
 			{
 				for (auto i = 0; i < directory_count; ++i)
 				{
-					const auto directory_name = "test" + std::to_string(i);
+					const auto directory_name = L"テスト" + std::to_wstring(i);
 					const auto full_directory = root_directory + directory_name;
 
 					// create file in directory
 					create_directory(full_directory);
 					{
-						const std::string filename = "test" + std::to_string(i) + ".txt";
-						const auto file_fullpath = full_directory + "/" + filename;
+						const auto filename = L"テスト" + std::to_wstring(i) + L".txt";
+						const auto file_fullpath = full_directory + L"/" + filename;
 						{
+							/*ofstream file(std::filesystem::path(file_fullpath.begin(), file_fullpath.end()));*/
 							ofstream file(file_fullpath);
-							file << filename;
+							file << std::filesystem::path(filename).u8string();
 							file.close();
 						}
 						
 						// what we're testing: that we only add the relative filepaths inside the directory.
-						populated_filenames.emplace_back(directory_name + "/" + filename);
+						populated_filenames.emplace_back(directory_name + L"/" + filename);
 					}
 				}
 			}
 
 			// write directory to archive
-			const auto writer = niazip_writer::Create(g_test_data_write_filepath);
+			const auto writer = niazip_writer::Create(test_directory_data_write_filepath);
 			{
 				ASSERT_TRUE(writer);
 				ASSERT_TRUE(writer->add_directory_contents(root_directory));
@@ -109,7 +112,7 @@ TEST(WriterTest, DirectoryAdd)
 		}
 		// b. read
 		{
-			const auto reader = niazip_reader::CreateFromFile(g_test_data_write_filepath);
+			const auto reader = niazip_reader::CreateFromFile(test_directory_data_write_filepath);
 			ASSERT_TRUE(reader);
 
 			auto vec_entry_names = reader->get_entry_names();

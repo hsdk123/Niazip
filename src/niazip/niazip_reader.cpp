@@ -1,9 +1,12 @@
 #include "niazip_reader.h"
+#include "niazip_helpers.h"
 
 #include <mz.h>
 #include <mz_zip.h>
 #include <mz_strm.h>
 #include <mz_zip_rw.h>
+
+#include <filesystem>
 
 using namespace niazpp;
 
@@ -20,7 +23,7 @@ niazpp::niazip_reader::~niazip_reader()
     }
 }
 
-std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromFile(const string_type& filepath, string_view password)
+std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromFile(const pathstring_type& filepath, string_view password)
 {
     auto ret = std::make_unique<niazip_reader>(password);
     {
@@ -36,7 +39,8 @@ std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromFile(const strin
         mz_zip_reader_set_progress_cb(_handle, options, minizip_extract_progress_cb);
         mz_zip_reader_set_overwrite_cb(_handle, options, minizip_extract_overwrite_cb);*/
 
-        const auto err = mz_zip_reader_open_file(ret->_handle, filepath.c_str());
+        const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
+        const auto err = mz_zip_reader_open_file(ret->_handle, filepath_u8.c_str());
         //const auto err = mz_zip_reader_open_file_in_memory(ret->_handle, filepath.c_str());
 
         // check errors
@@ -75,12 +79,12 @@ std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromMemory(const mem
     return ret;
 }
 
-bool niazpp::niazip_reader::extract_to_destination(const string_type& destination_directory)
+bool niazpp::niazip_reader::extract_to_destination(const pathstring_type& destination_directory)
 {
     return false;
 }
 
-bool niazpp::niazip_reader::extract_entry_to_destination(const string_type& destination_directory)
+bool niazpp::niazip_reader::extract_entry_to_destination(const pathstring_type& destination_directory)
 {
     return false;
 }
@@ -148,19 +152,22 @@ std::vector<file_info> niazpp::niazip_reader::get_info_entries()
     return ret;
 }
 
-std::vector<string_type> niazpp::niazip_reader::get_entry_names()
+std::vector<pathstring_type> niazpp::niazip_reader::get_entry_names()
 {
-    std::vector<string_type> ret;
+    std::vector<pathstring_type> ret;
     {
-        if (mz_zip_reader_goto_first_entry(_handle) == MZ_OK) {
+        if (mz_zip_reader_goto_first_entry(_handle) == MZ_OK) 
+        {
             do {
                 mz_zip_file* file_info = NULL;
                 if (mz_zip_reader_entry_get_info(_handle, &file_info) != MZ_OK) {
                     printf("Unable to get zip entry info\n");
                     break;
                 }
-                ret.emplace_back(file_info->filename);
-            } while (mz_zip_reader_goto_next_entry(_handle) == MZ_OK);
+                /*ret.emplace_back(std::filesystem::path(file_info->filename).wstring());*/
+                ret.emplace_back(niazpp::s2ws(file_info->filename));
+            } 
+            while (mz_zip_reader_goto_next_entry(_handle) == MZ_OK);
         }
     }
     return ret;

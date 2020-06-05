@@ -6,6 +6,7 @@
 #include <mz_zip_rw.h>
 
 #include <fstream>
+#include <filesystem>
 
 using namespace niazpp;
 
@@ -21,7 +22,7 @@ niazpp::niazip_writer::~niazip_writer()
 	}
 }
 
-std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const string_type& filepath, string_view password)
+std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const pathstring_type& filepath, string_view password)
 {
 	auto ret = std::make_unique<niazip_writer>();
 	{
@@ -35,7 +36,8 @@ std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const string_type& 
 		mz_zip_writer_set_compress_method(ret->_handle, MZ_COMPRESS_METHOD_STORE /*no compression*/);
 		//mz_zip_writer_set_compress_level
 
-		const auto err = mz_zip_writer_open_file(ret->_handle, filepath.c_str(), 0, 0 /*create, not append*/);
+		const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
+		const auto err = mz_zip_writer_open_file(ret->_handle, filepath_u8.c_str(), 0, 0 /*create, not append*/);
 
 		// check errors
 		if (err != MZ_OK) {
@@ -46,12 +48,13 @@ std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const string_type& 
 	return ret;
 }
 
-bool niazpp::niazip_writer::add_entry_from_file(const string_type& filepath)
+bool niazpp::niazip_writer::add_entry_from_file(const pathstring_type& filepath)
 {
 	// note: could just use mz_zip_writer_add_file
 
 	// get file buffer
-	std::ifstream file(filepath, std::ios::binary);
+	const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
+	std::ifstream file(filepath_u8, std::ios::binary);
 	if (!file) {
 		return false;
 	}
@@ -60,7 +63,7 @@ bool niazpp::niazip_writer::add_entry_from_file(const string_type& filepath)
 	// create file info 
 	mz_zip_file file_info = { 0 };
 	{
-		file_info.filename = filepath.c_str();
+		file_info.filename = filepath_u8.c_str();
 		file_info.flag = MZ_ZIP_FLAG_UTF8;
 	}
 
@@ -79,7 +82,7 @@ bool niazpp::niazip_writer::add_entry_from_memory(const memory_source& source)
 #include <filesystem>
 #include "niazip_helpers.h"
 
-bool niazpp::niazip_writer::add_directory_contents(const string_type& directory_path)
+bool niazpp::niazip_writer::add_directory_contents(const pathstring_type& directory_path)
 {
 	using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
 	for (auto& path_entry : recursive_directory_iterator(directory_path)) 
@@ -89,13 +92,12 @@ bool niazpp::niazip_writer::add_directory_contents(const string_type& directory_
 		}
 
 		// strip top directory path when registering in archive
-		const auto filepath = niazpp::ws2s(std::wstring(path_entry.path().c_str()));
-		const auto local_filepath = filepath.substr(directory_path.size());
+		const auto filepath = path_entry.path();
 
 		// get file buffer
 		std::string data;
 		{
-			std::ifstream file(filepath, std::ios::binary);
+			std::ifstream file(std::filesystem::path(filepath), std::ios::binary);
 			if (!file) {
 				return false;
 			}
@@ -106,10 +108,13 @@ bool niazpp::niazip_writer::add_directory_contents(const string_type& directory_
 			}
 		}
 
+		const auto local_filepath = filepath.wstring().substr(directory_path.size());
+		const auto local_filepath_u8 = std::filesystem::path(local_filepath).u8string();
+
 		// create file info 
 		mz_zip_file file_info = { 0 };
 		{
-			file_info.filename = local_filepath.c_str();
+			file_info.filename = local_filepath_u8.c_str();
 			file_info.flag = MZ_ZIP_FLAG_UTF8;
 		}
 

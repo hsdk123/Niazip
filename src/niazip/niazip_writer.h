@@ -1,17 +1,11 @@
 #pragma once
 #include "file_info.h"
+#include "niazip_types.h"
 
 #include <optional>
-#include <string>
 #include <vector>
 #include <memory>
 
-namespace niazpp
-{
-	using memory_source = std::string; // std::vector<char>;
-	using string_type = std::string;
-	using string_view = std::string_view;
-}
 namespace niazpp
 {
 	//--------------------------------------------------------------
@@ -25,14 +19,14 @@ namespace niazpp
 		niazip_writer(string_view password = "");
 		~niazip_writer();
 
-		static std::unique_ptr<niazip_writer> Create(const string_type& filepath, string_view password = "");
+		static std::unique_ptr<niazip_writer> Create(const pathstring_type& filepath, string_view password = "");
 
 		// individual entry additions
-		bool add_entry_from_file(const string_type& filepath);
+		bool add_entry_from_file(const pathstring_type& filepath);
 		bool add_entry_from_memory(const memory_source& source);
 
 		// adds the [contents] of the directory, thus excludes including the directory itself.
-		bool add_directory_contents(const string_type& directory_path);
+		bool add_directory_contents(const pathstring_type& directory_path);
 
 	public:
 		// information

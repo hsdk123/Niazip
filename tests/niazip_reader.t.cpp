@@ -8,8 +8,8 @@
 #include <unordered_set>
 #include <fstream>
 
-const std::string g_test_data_filepath = "./data/test_data.zip";
-const std::string g_test_data_pw_filepath = "./data/test_data_pw.zip";
+const niazpp::pathstring_type g_test_data_filepath = L"./data/test_data.zip";
+const niazpp::pathstring_type g_test_data_pw_filepath = L"./data/test_data_pw.zip";
 const std::string g_test_data_pw = "asdfasdfasdf";
 
 namespace {
@@ -21,7 +21,7 @@ void ReaderCheck(niazpp::niazip_reader& reader)
 		ASSERT_EQ(vec_entry_info.size(), vec_entry_names.size());
 		ASSERT_EQ(vec_entry_info.size(), 2);
 
-		ASSERT_THAT(vec_entry_names, testing::UnorderedElementsAre("data1.txt", "data2.txt"));
+		ASSERT_THAT(vec_entry_names, testing::UnorderedElementsAre(L"data1.txt", L"data2.txt"));
 	}
 	{
 		const auto entry = reader.extract_entry_to_memory("data1.txt");
@@ -48,7 +48,7 @@ TEST(ReaderTest, BasicCheck)
 		ASSERT_EQ(vec_entry_info.size(), vec_entry_names.size());
 		ASSERT_EQ(vec_entry_info.size(), 2);
 
-		ASSERT_THAT(vec_entry_names, testing::UnorderedElementsAre("data1.txt", "data2.txt"));
+		ASSERT_THAT(vec_entry_names, testing::UnorderedElementsAre(L"data1.txt", L"data2.txt"));
 	}
 }
 
