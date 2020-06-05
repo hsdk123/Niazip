@@ -25,6 +25,9 @@ namespace niazpp
 		bool add_entry_from_file(const pathstring_type& filepath);
 		bool add_entry_from_memory(const memory_source& source);
 
+		// adds the [contents] of the directory + original directory
+		bool add_directory(const pathstring_type& directory_path);
+
 		// adds the [contents] of the directory, thus excludes including the directory itself.
 		bool add_directory_contents(const pathstring_type& directory_path);
 

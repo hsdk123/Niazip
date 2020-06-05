@@ -66,7 +66,7 @@ TEST(WriterTest, DirectoryAdd)
 	using namespace niazpp;
 
 	const niazpp::pathstring_type test_directory_data_write_filepath = L"./data/test_write_directory_data.zip";
-	const niazpp::pathstring_type root_directory = L"./test_directory/";
+	const niazpp::pathstring_type root_directory = L"test_directory/";
 	const auto directory_count = 5;
 	{
 		// previous test cleanup.
@@ -82,13 +82,13 @@ TEST(WriterTest, DirectoryAdd)
 			{
 				for (auto i = 0; i < directory_count; ++i)
 				{
-					const auto directory_name = L"テスト" + std::to_wstring(i);
+					const auto directory_name = L"test" + std::to_wstring(i);
 					const auto full_directory = root_directory + directory_name;
 
 					// create file in directory
 					create_directory(full_directory);
 					{
-						const auto filename = L"テスト" + std::to_wstring(i) + L".txt";
+						const auto filename = L"test" + std::to_wstring(i) + L".txt";
 						const auto file_fullpath = full_directory + L"/" + filename;
 						{
 							/*ofstream file(std::filesystem::path(file_fullpath.begin(), file_fullpath.end()));*/
@@ -108,6 +108,81 @@ TEST(WriterTest, DirectoryAdd)
 			{
 				ASSERT_TRUE(writer);
 				ASSERT_TRUE(writer->add_directory_contents(root_directory));
+			}
+		}
+		// b. read
+		{
+			const auto reader = niazip_reader::CreateFromFile(test_directory_data_write_filepath);
+			ASSERT_TRUE(reader);
+
+			auto vec_entry_names = reader->get_entry_names();
+			{
+				ASSERT_EQ(vec_entry_names.size(), directory_count);
+
+				// compare: O(n log n)
+				{
+					clean_filepaths(vec_entry_names);
+					clean_filepaths(populated_filenames);
+
+					sort(vec_entry_names.begin(), vec_entry_names.end());
+					sort(populated_filenames.begin(), populated_filenames.end());
+				}
+
+				ASSERT_EQ(vec_entry_names, populated_filenames);
+			}
+		}
+	}
+}
+
+TEST(WriterTest, DirectoryAdd_IncludeDir)
+{
+	using namespace std;
+	using namespace std::filesystem;
+	using namespace niazpp;
+
+	const niazpp::pathstring_type test_directory_data_write_filepath = L"./data/test_write_directory_data.zip";
+	const niazpp::pathstring_type root_directory = L"test_directory/";
+	const auto directory_count = 5;
+	{
+		// previous test cleanup.
+		remove(test_directory_data_write_filepath.c_str());
+		remove_all(root_directory);
+
+		// a. write
+		std::vector<niazpp::pathstring_type> populated_filenames;
+		{
+			create_directory(root_directory);
+
+			// populate
+			{
+				for (auto i = 0; i < directory_count; ++i)
+				{
+					const auto directory_name = L"test" + std::to_wstring(i);
+					const auto full_directory = root_directory + directory_name;
+
+					// create file in directory
+					create_directory(full_directory);
+					{
+						const auto filename = L"test" + std::to_wstring(i) + L".txt";
+						const auto file_fullpath = full_directory + L"/" + filename;
+						{
+							/*ofstream file(std::filesystem::path(file_fullpath.begin(), file_fullpath.end()));*/
+							ofstream file(file_fullpath);
+							file << std::filesystem::path(filename).u8string();
+							file.close();
+						}
+
+						// what we're testing: that we add the full relative filepaths inside the directory.
+						populated_filenames.emplace_back(root_directory + directory_name + L"/" + filename);
+					}
+				}
+			}
+
+			// write directory to archive
+			const auto writer = niazip_writer::Create(test_directory_data_write_filepath);
+			{
+				ASSERT_TRUE(writer);
+				ASSERT_TRUE(writer->add_directory(root_directory));
 			}
 		}
 		// b. read

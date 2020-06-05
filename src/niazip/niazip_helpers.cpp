@@ -1,4 +1,5 @@
 #include "niazip_helpers.h"
+#include <algorithm>
 
 namespace niazpp
 {
@@ -16,5 +17,25 @@ namespace niazpp
 		std::wstring_convert<convert_typeX, wchar_t> converterX;
 
 		return converterX.to_bytes(wstr);
+	}
+
+	std::wstring clean_filepath(const std::wstring& filepath)
+	{
+		auto ret = filepath;
+		{
+			// replace all backward slashes with forward slashes
+			std::replace(ret.begin(), ret.end(), L'\\', L'/');
+		}
+		return ret;
+	}
+
+	std::string clean_filepath(const std::string& filepath)
+	{
+		auto ret = filepath;
+		{
+			// replace all backward slashes with forward slashes
+			std::replace(ret.begin(), ret.end(), '\\', '/');
+		}
+		return ret;
 	}
 }
