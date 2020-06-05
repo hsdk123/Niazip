@@ -12,6 +12,7 @@
 using namespace niazpp;
 
 niazpp::niazip_writer::niazip_writer(string_view password)
+	: _password(password)
 {
 }
 
@@ -25,13 +26,13 @@ niazpp::niazip_writer::~niazip_writer()
 
 std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const pathstring_type& filepath, string_view password)
 {
-	auto ret = std::make_unique<niazip_writer>();
+	auto ret = std::make_unique<niazip_writer>(password);
 	{
 		// create zip writer
 		mz_zip_writer_create(&ret->_handle);
 
-		if (!password.empty()) {
-			mz_zip_writer_set_password(ret->_handle, password.data());
+		if (!ret->_password.empty()) {
+			mz_zip_writer_set_password(ret->_handle, ret->_password.data());
 		}
 
 		mz_zip_writer_set_compress_method(ret->_handle, MZ_COMPRESS_METHOD_STORE /*no compression*/);

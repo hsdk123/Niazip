@@ -30,8 +30,8 @@ std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromFile(const paths
         // create zip reader
         mz_zip_reader_create(&ret->_handle);
 
-        if (!password.empty()) {
-            mz_zip_reader_set_password(ret->_handle, password.data());
+        if (!ret->_password.empty()) {
+            mz_zip_reader_set_password(ret->_handle, ret->_password.data());
         }
 
         mz_zip_reader_set_encoding(ret->_handle, MZ_ENCODING_UTF8);
@@ -59,8 +59,8 @@ std::unique_ptr<niazip_reader> niazpp::niazip_reader::CreateFromMemory(const mem
         // create zip reader
         mz_zip_reader_create(&ret->_handle);
 
-        if (!password.empty()) {
-            mz_zip_reader_set_password(ret->_handle, password.data());
+        if (!ret->_password.empty()) {
+            mz_zip_reader_set_password(ret->_handle, ret->_password.data());
         }
 
         mz_zip_reader_set_encoding(ret->_handle, MZ_ENCODING_UTF8);
@@ -102,6 +102,10 @@ std::optional<memory_source> niazpp::niazip_reader::extract_entry_to_memory(cons
         {
             /*if (err == MZ_PASSWORD_ERROR) {
                 mz_zip_reader_set_password(_handle, _password.data());
+                err = mz_zip_reader_entry_open(_handle);
+                if (err != MZ_OK) {
+                    return {};
+                }
             }*/
             if (err != MZ_OK) {
                 return {};

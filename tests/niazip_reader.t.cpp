@@ -3,6 +3,7 @@
 #include <gmock/gmock-matchers.h>
 
 #include <niazip/niazip_reader.h>
+#include <niazip/niazip_helpers.h>
 
 #include <filesystem>
 #include <unordered_set>
@@ -89,4 +90,23 @@ TEST(ReaderTest, CreatePasswordProtectedFromMemory)
 	ASSERT_TRUE(reader);
 
 	ReaderCheck(*reader);
+}
+
+TEST(ReaderTest, ReadPasswordProtected)
+{
+	using namespace std;
+	using namespace niazpp;
+
+	std::ifstream file("./data/test_directory_pw.zip", ios::binary);
+	ASSERT_TRUE(file);
+
+	std::string data = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+	const auto reader = niazip_reader::CreateFromMemory(data, "asdfasdf");
+	ASSERT_TRUE(reader);
+
+	const auto filenames = reader->get_entry_names();
+	for (const auto& filename : filenames) {
+		const auto res = reader->extract_entry_to_memory(niazpp::ws2s(filename));
+		ASSERT_TRUE(res);
+	}
 }
