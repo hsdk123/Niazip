@@ -16,10 +16,10 @@ namespace niazpp
 	class niazip_writer
 	{
 	public:
-		niazip_writer(string_view password = "");
+		niazip_writer(const std::string& password = "");
 		~niazip_writer();
 
-		static std::unique_ptr<niazip_writer> Create(const pathstring_type& filepath, string_view password = "");
+		static std::unique_ptr<niazip_writer> Create(const pathstring_type& filepath, const std::string& password = "");
 
 		// individual entry additions
 		bool add_entry_from_file(const pathstring_type& filepath);

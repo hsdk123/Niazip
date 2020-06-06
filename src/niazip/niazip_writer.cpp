@@ -11,7 +11,7 @@
 
 using namespace niazpp;
 
-niazpp::niazip_writer::niazip_writer(string_view password)
+niazpp::niazip_writer::niazip_writer(const std::string& password)
 	: _password(password)
 {
 }
@@ -24,7 +24,7 @@ niazpp::niazip_writer::~niazip_writer()
 	}
 }
 
-std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const pathstring_type& filepath, string_view password)
+std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const pathstring_type& filepath, const std::string& password)
 {
 	auto ret = std::make_unique<niazip_writer>(password);
 	{
@@ -36,7 +36,6 @@ std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const pathstring_ty
 		}
 
 		mz_zip_writer_set_compress_method(ret->_handle, MZ_COMPRESS_METHOD_STORE /*no compression*/);
-		//mz_zip_writer_set_compress_level
 
 		const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
 		const auto err = mz_zip_writer_open_file(ret->_handle, filepath_u8.c_str(), 0, 0 /*create, not append*/);
@@ -67,6 +66,12 @@ bool niazpp::niazip_writer::add_entry_from_file(const pathstring_type& filepath)
 	{
 		file_info.filename = filepath_u8.c_str();
 		file_info.flag = MZ_ZIP_FLAG_UTF8;
+
+		if (!_password.empty()) {
+			// password protection will only work if file info includes below settings
+			file_info.flag |= MZ_ZIP_FLAG_ENCRYPTED;
+			file_info.aes_version = MZ_AES_VERSION;
+		}
 	}
 
 	if (mz_zip_writer_add_buffer(_handle, data.data(), data.size(), &file_info) != MZ_OK) {
@@ -135,6 +140,11 @@ bool niazpp::niazip_writer::add_directory(const pathstring_type& directory_path)
 		{
 			file_info.filename = local_filepath_u8.c_str();
 			file_info.flag = MZ_ZIP_FLAG_UTF8;
+
+			if (!_password.empty()) {
+				file_info.flag |= MZ_ZIP_FLAG_ENCRYPTED;
+				file_info.aes_version = MZ_AES_VERSION;
+			}
 		}
 
 		if (mz_zip_writer_add_buffer(_handle, data.data(), data.size(), &file_info) != MZ_OK) {
