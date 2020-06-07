@@ -93,7 +93,9 @@ std::optional<memory_source> niazpp::niazip_reader::extract_entry_to_memory(cons
 {
     auto ret = std::make_optional<memory_source>();
     {
-        auto err = mz_zip_reader_locate_entry(_handle, entry_name.c_str(), 1);
+        const auto real_entry_name = _name_encrypter ? _name_encrypter(entry_name) : entry_name;;
+
+        auto err = mz_zip_reader_locate_entry(_handle, real_entry_name.c_str(), 1);
         if (err != MZ_OK) {
             return {};
         }
@@ -119,7 +121,14 @@ std::optional<memory_source> niazpp::niazip_reader::extract_entry_to_memory(cons
             auto buffer = memory_source(file_info->uncompressed_size, ' ');
             {
                 const auto bytes_read = mz_zip_reader_entry_read(_handle, buffer.data(), buffer.length());
+
+                if (_data_decrypter) {
+                    if (!_data_decrypter(buffer)) {
+                        return {};
+                    }
+                }
             }
+
             ret.emplace(std::move(buffer));
         }
         mz_zip_reader_entry_close(_handle);
@@ -156,7 +165,7 @@ std::vector<file_info> niazpp::niazip_reader::get_info_entries()
     return ret;
 }
 
-std::vector<pathstring_type> niazpp::niazip_reader::get_entry_names()
+std::vector<pathstring_type> niazpp::niazip_reader::get_decrypted_names()
 {
     std::vector<pathstring_type> ret;
     {
@@ -169,7 +178,9 @@ std::vector<pathstring_type> niazpp::niazip_reader::get_entry_names()
                     break;
                 }
                 /*ret.emplace_back(std::filesystem::path(file_info->filename).wstring());*/
-                ret.emplace_back(niazpp::s2ws(file_info->filename));
+
+                const auto original_name = _name_decrypter ? _name_decrypter(file_info->filename) : file_info->filename;
+                ret.emplace_back(niazpp::s2ws(original_name));
             } 
             while (mz_zip_reader_goto_next_entry(_handle) == MZ_OK);
         }

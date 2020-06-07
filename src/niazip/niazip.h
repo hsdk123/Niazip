@@ -73,7 +73,7 @@ namespace niazpp
 		// information
 		bool exists_entry(const string_type& entry_name);
 		std::vector<zip_info> get_info_entries();
-		std::vector<string_type> get_entry_names();
+		std::vector<string_type> get_decrypted_names();
 
 	public:
 		// utility

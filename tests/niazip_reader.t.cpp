@@ -17,7 +17,7 @@ namespace {
 void ReaderCheck(niazpp::niazip_reader& reader)
 {
 	const auto& vec_entry_info = reader.get_info_entries();
-	const auto& vec_entry_names = reader.get_entry_names();
+	const auto& vec_entry_names = reader.get_decrypted_names();
 	{
 		ASSERT_EQ(vec_entry_info.size(), vec_entry_names.size());
 		ASSERT_EQ(vec_entry_info.size(), 2);
@@ -44,7 +44,7 @@ TEST(ReaderTest, BasicCheck)
 	ASSERT_TRUE(reader);
 
 	const auto& vec_entry_info = reader->get_info_entries();
-	const auto& vec_entry_names = reader->get_entry_names();
+	const auto& vec_entry_names = reader->get_decrypted_names();
 	{
 		ASSERT_EQ(vec_entry_info.size(), vec_entry_names.size());
 		ASSERT_EQ(vec_entry_info.size(), 2);
@@ -104,7 +104,7 @@ TEST(ReaderTest, ReadPasswordProtected)
 	const auto reader = niazip_reader::CreateFromMemory(data, "asdfasdf");
 	ASSERT_TRUE(reader);
 
-	const auto filenames = reader->get_entry_names();
+	const auto filenames = reader->get_decrypted_names();
 	for (const auto& filename : filenames) {
 		const auto res = reader->extract_entry_to_memory(niazpp::ws2s(filename));
 		ASSERT_TRUE(res);

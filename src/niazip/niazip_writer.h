@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace niazpp
 {
@@ -32,13 +33,20 @@ namespace niazpp
 		bool add_directory_contents(const pathstring_type& directory_path);
 
 	public:
+		// custom methods.
+
+		using file_encryptor = std::function<bool(std::string&/*name to register in zip*/, std::string&/*data*/)>;
+		void set_file_encrypter(file_encryptor func) { _file_encrypter = func; }
+
+	public:
 		// information
 		std::vector<file_info> get_info_entries();
-		std::vector<string_type> get_entry_names();
+		std::vector<string_type> get_decrypted_names();
 
 	private:
 		using ZipHandle = void;
 		ZipHandle* _handle = nullptr;
+		file_encryptor _file_encrypter = nullptr;
 		const std::string _password;
 	};
 }

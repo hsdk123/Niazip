@@ -182,7 +182,7 @@ std::vector<zip_info> niazpp::niazip::get_info_entries()
 	return ret;
 }
 
-std::vector<string_type> niazpp::niazip::get_entry_names()
+std::vector<string_type> niazpp::niazip::get_decrypted_names()
 {
 	std::vector<string_type> ret;
 	{

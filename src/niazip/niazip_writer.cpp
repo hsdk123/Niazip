@@ -54,12 +54,16 @@ bool niazpp::niazip_writer::add_entry_from_file(const pathstring_type& filepath)
 	// note: could just use mz_zip_writer_add_file
 
 	// get file buffer
-	const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
+	auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
 	std::ifstream file(filepath_u8, std::ios::binary);
 	if (!file) {
 		return false;
 	}
 	std::string data = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+
+	if (_file_encrypter) {
+		_file_encrypter(filepath_u8, data);
+	}
 
 	// create file info 
 	mz_zip_file file_info = { 0 };
@@ -133,7 +137,11 @@ bool niazpp::niazip_writer::add_directory(const pathstring_type& directory_path)
 
 		/*const auto local_filepath = filepath.wstring().substr(directory_path.size());
 		const auto local_filepath_u8 = std::filesystem::path(local_filepath).u8string();*/
-		const auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(filepath).u8string());
+		auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(filepath).u8string());
+
+		if (_file_encrypter) {
+			_file_encrypter(local_filepath_u8, data);
+		}
 
 		// create file info 
 		mz_zip_file file_info = { 0 };
@@ -213,7 +221,7 @@ std::vector<file_info> niazpp::niazip_writer::get_info_entries()
 	return std::vector<file_info>();
 }
 
-std::vector<string_type> niazpp::niazip_writer::get_entry_names()
+std::vector<string_type> niazpp::niazip_writer::get_decrypted_names()
 {
 	return std::vector<string_type>();
 }
