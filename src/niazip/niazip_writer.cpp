@@ -199,7 +199,11 @@ bool niazpp::niazip_writer::add_directory_contents(const pathstring_type& direct
 		}
 
 		const auto local_filepath = filepath.wstring().substr(directory_path.size());
-		const auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(local_filepath).u8string());
+		auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(local_filepath).u8string());
+
+		if (_file_encrypter) {
+			_file_encrypter(local_filepath_u8, data);
+		}
 
 		// create file info 
 		mz_zip_file file_info = { 0 };

@@ -35,6 +35,9 @@ namespace niazpp
 	public:
 		// custom methods.
 
+		// Design:
+		// - file_encryptor will be applied to each file to put inside of the zip
+		// - name to register is also sent is as reference to allow ex. scrambling of names when putting in zip
 		using file_encryptor = std::function<bool(std::string&/*name to register in zip*/, std::string&/*data*/)>;
 		void set_file_encrypter(file_encryptor func) { _file_encrypter = func; }
 
