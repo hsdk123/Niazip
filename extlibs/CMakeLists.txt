@@ -4,6 +4,8 @@ include_directories(./)
 include(FetchContent)
 
 # minizip
+# MZ_FORCE_FETCH_LIBS: always force fetch deps for minizip to prevent headaches.
+set(MZ_FORCE_FETCH_LIBS ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
   minizip
   GIT_REPOSITORY https://github.com/nmoinvaz/minizip.git
