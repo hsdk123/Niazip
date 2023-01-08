@@ -1,5 +1,7 @@
 #include "niazip_helpers.h"
 #include <algorithm>
+#include <codecvt>
+#include <locale>
 
 namespace niazpp
 {
