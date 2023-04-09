@@ -14,9 +14,10 @@ set(MZ_LZMA OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
   minizip
-  GIT_REPOSITORY https://github.com/nmoinvaz/minizip.git
+  GIT_REPOSITORY https://github.com/zlib-ng/minizip-ng
   #GIT_REPOSITORY https://github.com/hsdk123/minizip.git
-  GIT_TAG        master
+  #GIT_TAG        master
+  GIT_TAG 03e4d2213d2e3522dfbdbb6b13d0d293b6fa2569 # using this due to https://github.com/zlib-ng/minizip-ng/issues/692
 )
 FetchContent_MakeAvailable(minizip)
 
