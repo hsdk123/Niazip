@@ -98,17 +98,22 @@ bool niazpp::niazip_writer::add_directory(const pathstring_type& directory_path)
 
 	const auto full_directory_clean = niazpp::clean_filepath(directory_path);
 	pathstring_type root_directory = full_directory_clean;
+
+	// calculate the starting directory:
+	// what we use for the filename entry inside the zip.
+	// Design Note: previously just updated root_directory to be that last directory,
+	// but 'recursive_directory_iterator(root_directory)' will fail if that directory is a subfolder
+	// (recursive_directory_iterator seems to take directory relative to current)
+	auto last_directory_string_start_index = 0;
 	{
-		if (full_directory_clean.back() == L'/') {
-			root_directory.pop_back();
+		auto last_directory_name = root_directory;
+		if (last_directory_name.back() == L'/') {
+			last_directory_name.pop_back();
 		}
 
 		// get the last directory name in the string, then add '/'
-		const auto pos = root_directory.find_last_of(L'/');
-		if (pos != pathstring_type::npos) {
-			root_directory = root_directory.substr(pos + 1);
-		}
-		root_directory += L'/';
+		const auto pos = last_directory_name.find_last_of(L'/');
+		last_directory_string_start_index = pos != pathstring_type::npos ? (pos + 1) : 0;
 	}
 
 	using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
@@ -119,7 +124,7 @@ bool niazpp::niazip_writer::add_directory(const pathstring_type& directory_path)
 		}
 
 		// strip top directory path when registering in archive
-		const auto filepath = path_entry.path();
+		auto filepath = path_entry.path();
 
 		// get file buffer
 		std::string data;
@@ -137,7 +142,17 @@ bool niazpp::niazip_writer::add_directory(const pathstring_type& directory_path)
 
 		/*const auto local_filepath = filepath.wstring().substr(directory_path.size());
 		const auto local_filepath_u8 = std::filesystem::path(local_filepath).u8string();*/
-		auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(filepath).u8string());
+		std::string local_filepath_u8;
+		{
+			// make sure the local filepath starts with the folder we started with.
+			auto local_filepath_w = niazpp::clean_filepath(std::filesystem::path(filepath).wstring()); {
+				if (local_filepath_w.size() <= last_directory_string_start_index) {
+					return false;
+				}
+				local_filepath_w = local_filepath_w.substr(last_directory_string_start_index);
+			}
+			local_filepath_u8 = niazpp::ws2s(local_filepath_w);
+		}
 
 		if (_file_encrypter) {
 			_file_encrypter(local_filepath_u8, data);

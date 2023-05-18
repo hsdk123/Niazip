@@ -17,7 +17,7 @@ target_sources(NiazipTests PRIVATE
 main.cpp
 niazip_reader.t.cpp
 niazip_writer.t.cpp
-)
+ "data/niazip_test_helpers.h")
 
 # Subdirectories
 #add_subdirectory(Code)

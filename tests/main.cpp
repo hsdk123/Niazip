@@ -3,5 +3,10 @@
 int main(int argc, char** argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	RUN_ALL_TESTS();
+
+	// wait for enter
+	std::cin.get();
+
+	return 0;
 }
