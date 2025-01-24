@@ -54,7 +54,7 @@ void directory_tests(
 					{
 						const auto filename = L"test" + std::to_wstring(i) + L".txt";
 						const auto file_fullpath = full_directory + L"/" + filename;
-						const auto file_data = std::filesystem::path(filename).u8string() + "extra_information";
+						const auto file_data = std::filesystem::path(filename).string() + "extra_information";
 						{
 							/*ofstream file(std::filesystem::path(file_fullpath.begin(), file_fullpath.end()));*/
 							ofstream file(file_fullpath);

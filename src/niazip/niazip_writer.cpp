@@ -37,7 +37,7 @@ std::unique_ptr<niazip_writer> niazpp::niazip_writer::Create(const pathstring_ty
 
 		mz_zip_writer_set_compress_method(ret->_handle, MZ_COMPRESS_METHOD_STORE /*no compression*/);
 
-		const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
+		const auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).string();
 		const auto err = mz_zip_writer_open_file(ret->_handle, filepath_u8.c_str(), 0, 0 /*create, not append*/);
 
 		// check errors
@@ -54,7 +54,7 @@ bool niazpp::niazip_writer::add_entry_from_file(const pathstring_type& filepath)
 	// note: could just use mz_zip_writer_add_file
 
 	// get file buffer
-	auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).u8string();
+	auto filepath_u8 = std::filesystem::path(filepath.begin(), filepath.end()).string();
 	std::ifstream file(filepath_u8, std::ios::binary);
 	if (!file) {
 		return false;
@@ -214,7 +214,7 @@ bool niazpp::niazip_writer::add_directory_contents(const pathstring_type& direct
 		}
 
 		const auto local_filepath = filepath.wstring().substr(directory_path.size());
-		auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(local_filepath).u8string());
+		auto local_filepath_u8 = niazpp::clean_filepath(std::filesystem::path(local_filepath).string());
 
 		if (_file_encrypter) {
 			_file_encrypter(local_filepath_u8, data);
