@@ -14,14 +14,16 @@ target_include_directories(NiazipTests PUBLIC
 )
 
 target_sources(NiazipTests PRIVATE
-main.cpp
-niazip_reader.t.cpp
-niazip_writer.t.cpp
- "data/niazip_test_helpers.h")
+	main.cpp
+	niazip_reader.t.cpp
+	niazip_writer.t.cpp
+)
 
 # Subdirectories
 #add_subdirectory(Code)
 
 # Copy data files
 add_custom_command(TARGET NiazipTests POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data)
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+			${CMAKE_CURRENT_SOURCE_DIR}/data 
+			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data)

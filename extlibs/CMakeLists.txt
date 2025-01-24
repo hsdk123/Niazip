@@ -11,6 +11,7 @@ set(MZ_FORCE_FETCH_LIBS ON CACHE BOOL "" FORCE)
 # reference: https://github.com/zlib-ng/minizip-ng/blob/master/mz_zip_rw.c#L1913
 set(MZ_BZIP2 OFF CACHE BOOL "" FORCE)
 set(MZ_LZMA OFF CACHE BOOL "" FORCE)
+set(MZ_ZSTD OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
   minizip
